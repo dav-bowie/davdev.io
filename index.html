@@ -68,6 +68,7 @@
             let highlightedText = typedTextElement.innerHTML;
 
             words.forEach(word => {
+                const regex = new RegExp(word, 'gi');
                 highlightedText = highlightedText.replace(regex, `<span class="highlight">${word}</span>`);
             });
 
