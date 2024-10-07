@@ -60,7 +60,7 @@ footer {
     color: #fff;
     text-align: center;
     padding: 20px;
-    position: relative; // Changed from fixed to relative
+    position: relative; /* Changed from fixed to relative */
     width: 100%;
 }
 
