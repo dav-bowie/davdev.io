@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Gallery | David Bui</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover::before {
+            opacity: 0.3;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-item-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-item-info {
+            transform: translateY(0);
+        }
+
+        .gallery-item-title {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .gallery-item-ingredients {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-description {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .modal-ingredients {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .modal-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .modal-gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .modal-pdf-container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 30px;
+        }
+
+        .modal-pdf-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .modal-pdf {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+
+        .close {
+            color: #fff;
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Add this to ensure the footer stays at the bottom */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            flex: 1;
+        }
+
+        footer {
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="resume.html">Resume</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="photos.html" class="active">Photos</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Food Gallery</h2>
+        <div class="gallery-container">
+            <div id="gallery-grid" class="gallery-grid">
+                <!-- Gallery items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <h2 id="modalTitle" class="modal-title"></h2>
+            <p id="modalDescription" class="modal-description"></p>
+            <p id="modalIngredients" class="modal-ingredients"></p>
+            <div id="modalGallery" class="modal-gallery"></div>
+            <div id="modalPdfContainer" class="modal-pdf-container" style="display: none;">
+                <h3 class="modal-pdf-title">Homemade Pizza Report for Engineers: The Science and Engineering of Cooking
+                    Food</h3>
+                <iframe id="modalPdf" class="modal-pdf"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Developed by David Bui</p>
+    </footer>
+
+    <script>
+        const galleryGrid = document.getElementById('gallery-grid');
+        const modal = document.getElementById('imageModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalIngredients = document.getElementById('modalIngredients');
+        const modalGallery = document.getElementById('modalGallery');
+        const modalPdfContainer = document.getElementById('modalPdfContainer');
+        const modalPdf = document.getElementById('modalPdf');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        const foodItems = [
+            {
+                title: "Homemade Pizza",
+                image: "foodphotos/cookedpizza.jpg",
+                description: "A delicious homemade pizza with a crispy crust.",
+                ingredients: "Ingredients: Pizza dough, tomato sauce, mozzarella cheese, mushrooms, bell peppers, onions, olive oil, salt, and oregano.",
+                gallery: [
+                    "foodphotos/cookedpizza.jpg",
+                    "foodphotos/cookedpizza2.jpg",
+                    "foodphotos/mixingpizzadough.jpg",
+                    "foodphotos/rollingdough.jpg",
+                    "foodphotos/rawpizza2.jpg"
+                ],
+                pdf: "foodphotos/ME126_Lab_4___Lava_Cake (1).pdf"
+            },
+            {
+                title: "Lava Cake",
+                image: "foodphotos/lavacake.jpg",
+                description: "A decadent chocolate lava cake with a gooey center, made with dark chocolate, butter, eggs, sugar, flour, and vanilla extract.",
+                ingredients: "Ingredients: Dark chocolate, unsalted butter, eggs, sugar, all-purpose flour, and vanilla extract.",
+                gallery: ["foodphotos/lavacake.jpg"],
+                pdf: "foodphotos/ME126_Lab_4___Lava_Cake (1).pdf"
+            },
+            {
+                title: "Sourdough Bread",
+                image: "foodphotos/sourdough_bread.jpg",
+                description: "A rustic sourdough bread loaf with a crispy crust and chewy interior, made from sourdough starter, bread flour, water, and salt.",
+                ingredients: "Ingredients: Sourdough starter, bread flour, water, and salt.",
+                gallery: ["foodphotos/sourdough_bread.jpg"]
+            },
+            {
+                title: "Chocolate Chip Cookies",
+                image: "foodphotos/chocolate_chip_cookies.jpg",
+                description: "Classic chocolate chip cookies with a perfect balance of crispy edges and chewy centers, packed with chocolate chips.",
+                ingredients: "Ingredients: Unsalted butter, brown sugar, granulated sugar, eggs, vanilla extract, all-purpose flour, baking soda, salt, and chocolate chips.",
+                gallery: ["foodphotos/chocolate_chip_cookies.jpg"]
+            },
+            {
+                title: "Grilled Steak",
+                image: "foodphotos/grilled_steak.jpg",
+                description: "A juicy grilled ribeye steak seasoned with salt, black pepper, and garlic powder, cooked to perfection.",
+                ingredients: "Ingredients: Ribeye steak, salt, black pepper, and garlic powder.",
+                gallery: ["foodphotos/grilled_steak.jpg"]
+            },
+            {
+                title: "Bún Bò Huế",
+                image: "foodphotos/bun_bo_hue.jpg",
+                description: "A spicy and flavorful Vietnamese beef noodle soup with lemongrass, featuring tender beef shank, pork hocks, and rice noodles.",
+                ingredients: "Ingredients: Beef shank, pork hocks, rice noodles, lemongrass, fish sauce, sugar, salt, and spices.",
+                gallery: ["foodphotos/bun_bo_hue.jpg"]
+            },
+            {
+                title: "Phở",
+                image: "foodphotos/pho.jpg",
+                description: "A comforting Vietnamese noodle soup with a rich beef broth, rice noodles, tender beef slices, and aromatic herbs.",
+                ingredients: "Ingredients: Beef broth, rice noodles, beef slices, onions, lime, fish sauce, and herbs.",
+                gallery: ["foodphotos/pho.jpg"]
+            },
+            {
+                title: "Bún Thịt Nướng",
+                image: "foodphotos/bun_thit_nuong.jpg",
+                description: "A refreshing Vietnamese dish with grilled lemongrass pork, rice vermicelli, fresh herbs, and a tangy fish sauce dressing.",
+                ingredients: "Ingredients: Grilled lemongrass pork, rice vermicelli, fresh herbs, fish sauce, and lime.",
+                gallery: ["foodphotos/bun_thit_nuong.jpg"]
+            }
+        ];
+
+        function createGallery() {
+            foodItems.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.classList.add('gallery-item');
+                galleryItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="gallery-item-info">
+                        <h3 class="gallery-item-title">${item.title}</h3>
+                        <p class="gallery-item-ingredients">${item.description}</p>
+                    </div>
+                `;
+                galleryGrid.appendChild(galleryItem);
+
+                galleryItem.addEventListener('click', () => openModal(item));
+            });
+        }
+
+        function openModal(item) {
+            modalTitle.textContent = item.title;
+            modalDescription.textContent = item.description;
+            modalIngredients.textContent = item.ingredients;
+            modalGallery.innerHTML = '';
+
+            item.gallery.forEach(imageSrc => {
+                const galleryItem = document.createElement('div');
+                galleryItem.classList.add('modal-gallery-item');
+                galleryItem.innerHTML = `<img src="${imageSrc}" alt="${item.title}">`;
+                modalGallery.appendChild(galleryItem);
+            });
+
+            modalPdfContainer.style.display = 'none';
+            if (item.pdf) {
+                modalPdf.src = item.pdf;
+                modalPdfContainer.style.display = 'block';
+            }
+
+            modal.style.display = 'block';
+        }
+
+        closeBtn.onclick = function () {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        createGallery();
+    </script>
+</body>
+
+</html>
